@@ -1,2 +1,14 @@
-if __name__ == '__main__':
-    pass
+from fastapi import FastAPI
+import uvicorn
+
+app = FastAPI()
+
+@app.get("/health")
+def read_root():
+    return {"200 - OK"}
+
+# Run the server using Uvicorn
+if __name__ == "__main__":
+    #print("I am in main")
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+
