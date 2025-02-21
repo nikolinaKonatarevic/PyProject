@@ -14,7 +14,8 @@ run:
 	@poetry run uvicorn src.main:app --host 0.0.0.0 --reload
 
 start-containers:
-	@docker-compose up --detach --build
+	@docker-compose up --detach --build db
+	@docker-compose up --detach --build backend
 
 stop-containers:
 	@docker-compose down
