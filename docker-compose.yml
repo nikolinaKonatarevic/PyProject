@@ -5,8 +5,6 @@ services:
     build: ./
     ports:
       - "${HOST_SERVER_PORT}:${CONTAINER_SERVER_PORT}"
-    #command:
-    #  - python3 src/main.py
     depends_on:
       - db
     environment:
@@ -15,7 +13,6 @@ services:
   db:
     image: postgres:15
     restart: always
-    # set shared memory limit when using docker-compose
     shm_size: 128mb
     ports:
       - "${HOST_DB_PORT}:${CONTAINER_DB_PORT}"
@@ -23,3 +20,8 @@ services:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
