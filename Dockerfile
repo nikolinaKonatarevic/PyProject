@@ -6,12 +6,15 @@ ENV POETRY_VIRTUALENVS_CREATE=false
 
 RUN apk add --no-cache bash util-linux gcc musl-dev linux-headers libpq libffi-dev
 
-# Installing libraries
+#Installing libraries
 RUN pip install --upgrade pip poetry==1.8.3 && \
-    pip install fastapi uvicorn  && \
     apk add --no-cache netcat-openbsd
 
 COPY poetry.lock pyproject.toml ./
+
+RUN poetry lock &&  \
+    poetry install --no-root --all-extras --with dev,api,lambda
+
 
 FROM python:3.12-alpine  as runtime
 
@@ -24,8 +27,6 @@ RUN chmod +x /entrypoint.sh
 #Creating a group and seting a user
 RUN addgroup --gid 1000 appuser && \
     adduser appuser -DH -h /app -u 1000 -G appuser
-
-USER appuser
 
 #copy all dep
 COPY src/ /app/src
