@@ -1,7 +1,7 @@
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.dataBase.base_model import Base
+from src.data_base.base_model import Base
 from src.permissions.models import Permission
 from src.projects.models import Project
 
