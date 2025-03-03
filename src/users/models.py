@@ -1,9 +1,7 @@
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.data_base.base_model import Base
-from src.permissions.models import Permission
-from src.projects.models import Project
+from src.database.base_model import Base
 
 
 class User(Base):
@@ -13,8 +11,8 @@ class User(Base):
     password: Mapped[str] = mapped_column(String, nullable=False, comment="User Password")
 
     # relationships
-    projects: Mapped["Project"] = relationship("Project", back_populates="owner")
-    permissions: Mapped["Permission"] = relationship("Permission", back_populates="user")
+    projects = relationship("Project", back_populates="users")
+    permissions = relationship("Permission", back_populates="users")
 
     def __repr__(self):
         return f"<User(id={self.id}, email={self.email})>"

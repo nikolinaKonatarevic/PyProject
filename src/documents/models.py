@@ -1,8 +1,7 @@
 from sqlalchemy import ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.data_base.base_model import Base
-from src.projects.models import Project
+from src.database.base_model import Base
 
 
 class Document(Base):
@@ -13,7 +12,7 @@ class Document(Base):
     project_id: Mapped[int] = mapped_column(Integer, ForeignKey("projects.id"), nullable=False, comment="Project ID")
 
     # relationships
-    project: Mapped["Project"] = relationship("Project", back_populates="documents")
+    project = relationship("Project", back_populates="documents")
 
     def __repr__(self):
         return f"<Document(file name: {self.file_name})>"

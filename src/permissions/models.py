@@ -2,10 +2,8 @@ from sqlalchemy import Enum, ForeignKey, Integer
 from sqlalchemy.orm import Mapped, relationship
 from sqlalchemy.testing.schema import mapped_column
 
-from src.data_base.base_model import Base
+from src.database.base_model import Base
 from src.permissions.enums import RequestStatus, UserRole
-from src.projects.models import Project
-from src.users.models import User
 
 
 class Permission(Base):
@@ -17,8 +15,8 @@ class Permission(Base):
     request_status: Mapped[RequestStatus] = mapped_column(Enum(RequestStatus), nullable=False, comment="Request Status")
 
     # relationships
-    user: Mapped["User"] = relationship("User", back_populates="permissions")
-    project: Mapped["Project"] = relationship("Project", back_populates="permissions")
+    user = relationship("User", back_populates="permissions")
+    project = relationship("Project", back_populates="permissions")
 
     def __repr__(self):
         return f"<Permission(project id = {self.id}, user id ={self.user_id})>"

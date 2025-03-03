@@ -1,13 +1,8 @@
-from typing import List
-
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, relationship
 from sqlalchemy.testing.schema import mapped_column
 
-from src.data_base.base_model import Base
-from src.documents.models import Document
-from src.permissions.models import Permission
-from src.users.models import User
+from src.database.base_model import Base
 
 
 class Project(Base):
@@ -20,11 +15,9 @@ class Project(Base):
     )
 
     # relationships
-    owner: Mapped["User"] = relationship("User", back_populates="project")
-    documents: Mapped[List["Document"]] = relationship(
-        "Document", back_populates="project", cascade="all, delete-orphan"
-    )
-    permissions: Mapped[List["Permission"]] = relationship("Permission", back_populates="project")
+    owner = relationship("User", back_populates="projects")
+    documents = relationship("Document", backref="projects")
+    permissions = relationship("Permission", back_populates="projects")
 
     def __repr__(self):
         return f"<Project(name: {self.name})>"
