@@ -29,10 +29,12 @@ optional = true
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.0"
 pre-commit = "^4.1.0"
-sqlalchemy = "^2.0.38"
-psycopg2 = "^2.9.10"
+psycopg2-binary = "^2.9.10"
 python-dotenv = "^1.0.1"
-pydantic = "^2.10.6"
+pydantic-settings = "^2.8.0"
+pydantic = {extras = ["email"], version = "^2.10.6"}
+sqlalchemy = "^2.0.38"
+alembic = "^1.14.1"
 
 [tool.ruff]
 line-length = 120
