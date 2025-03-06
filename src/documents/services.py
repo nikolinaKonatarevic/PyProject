@@ -7,6 +7,7 @@ from src.exceptions import (
     PostFailedException,
     UpdateFailedException,
 )
+from src.permissions.enums import UserRole
 
 
 class DocumentService:
@@ -14,7 +15,7 @@ class DocumentService:
         self.repository = repository
 
     def get_all_documents(self, project_id: int, user_id: int) -> list[dto.Document]:
-        if not self.repository.has_permission_proj(project_id, user_id):
+        if not self.repository.has_permission_proj(project_id, user_id, (UserRole.OWNER, UserRole.PARTICIPANT)):
             raise AccessDeniedException()
 
         documents = self.repository.get_all_documents(project_id)
@@ -58,7 +59,7 @@ class DocumentService:
         return result
 
     def upload_documents(self, project_id: int, user_id: int, doc_data: list[dto.DocumentCreate]):
-        if not self.repository.has_permission_proj(project_id, user_id):
+        if not self.repository.has_permission_proj(project_id, user_id, (UserRole.OWNER, UserRole.PARTICIPANT)):
             raise AccessDeniedException()
 
         result = self.repository.upload_documents(project_id, user_id, doc_data)

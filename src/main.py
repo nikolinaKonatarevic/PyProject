@@ -1,13 +1,12 @@
 import uvicorn
 from fastapi import FastAPI
-from middlewares import ExceptionHandlerMiddleware
 
-from src.api.v1.routers import v1_router
+from src.api.v1 import v1_router
+from src.middlewares import exception_handler_factory
 
 app = FastAPI()
 
-app.add_middleware(ExceptionHandlerMiddleware)  # type: ignore
-
+app.add_middleware(exception_handler_factory(app))
 app.include_router(v1_router)
 
 
