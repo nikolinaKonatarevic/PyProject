@@ -1,7 +1,3 @@
-from fastapi import Depends
-from sqlalchemy.orm import Session
-
-from src.database.sync_engine import get_db_session
 from src.exceptions import DeleteFailedException, NotFoundException, PostFailedException, UpdateFailedException
 from src.users import dto
 from src.users.repositories import UserRepository
@@ -34,8 +30,3 @@ class UserService:
         if user is None:
             raise DeleteFailedException()
         return self.repository.delete_user(user_id)
-
-
-def get_user_service(db: Session = Depends(get_db_session)):
-    repository = UserRepository(db)
-    return UserService(repository)

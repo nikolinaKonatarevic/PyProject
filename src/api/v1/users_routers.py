@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends
 from starlette import status
 
+from src.deps import get_user_service
 from src.users import dto
-from src.users.services import UserService, get_user_service
+from src.users.services import UserService
 
 user_router = APIRouter(prefix="/users", tags=["users"])
 

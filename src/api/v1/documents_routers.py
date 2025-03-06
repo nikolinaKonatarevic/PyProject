@@ -1,10 +1,9 @@
-from typing import List
-
 from fastapi import APIRouter, Depends
 from starlette import status
 
+from src.deps import get_document_service
 from src.documents import dto
-from src.documents.services import DocumentService, get_document_service
+from src.documents.services import DocumentService
 
 document_router = APIRouter(tags=["documents"])
 
@@ -12,7 +11,7 @@ document_router = APIRouter(tags=["documents"])
 @document_router.get("/documents", status_code=status.HTTP_200_OK)
 def get_all_documents(
     user_id: int, project_id: int, document_service: DocumentService = Depends(get_document_service)
-) -> List[dto.Document]:
+) -> list[dto.Document]:
     return document_service.get_all_documents(project_id, user_id)
 
 
@@ -20,9 +19,9 @@ def get_all_documents(
 def upload_documents(
     project_id: int,
     user_id: int,
-    doc_data: List[dto.DocumentCreate],
+    doc_data: list[dto.DocumentCreate],
     document_service: DocumentService = Depends(get_document_service),
-) -> List[dto.Document]:
+) -> list[dto.Document]:
     return document_service.upload_documents(project_id, user_id, doc_data)
 
 

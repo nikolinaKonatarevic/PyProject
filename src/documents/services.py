@@ -1,9 +1,4 @@
-from fastapi import Depends
-from sqlalchemy.orm import Session
-
-from src.database.sync_engine import get_db_session
 from src.documents import dto
-from src.documents.models import Document
 from src.documents.repositories import DocumentRepository
 from src.exceptions import (
     AccessDeniedException,
@@ -66,18 +61,7 @@ class DocumentService:
         if not self.repository.has_permission_proj(project_id, user_id):
             raise AccessDeniedException()
 
-        def dto_to_model(dto_doc: dto.DocumentCreate) -> Document:
-            doc_dict = dto_doc.model_dump()
-            return Document(**doc_dict)
-
-        doc_list = [dto_to_model(model) for model in doc_data]
-
-        result = self.repository.upload_documents(project_id, user_id, doc_list)
+        result = self.repository.upload_documents(project_id, user_id, doc_data)
         if not result:
             raise PostFailedException()
         return [dto.Document.model_validate(project) for project in result]
-
-
-def get_document_service(db: Session = Depends(get_db_session)):
-    repository = DocumentRepository(db)
-    return DocumentService(repository)
