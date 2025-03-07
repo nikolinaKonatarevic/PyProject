@@ -1,10 +1,8 @@
-from typing import List
-
-from fastapi import HTTPException
 from sqlalchemy import Delete, Insert, Select, Update, delete, insert, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from src.documents import dto
 from src.documents.models import Document
 from src.permissions.enums import UserRole
 from src.permissions.models import Permission
@@ -22,7 +20,7 @@ class DocumentRepository:
         result = self.session.execute(query)
         return result.scalar_one_or_none()
 
-    def get_all_documents(self, project_id: int) -> List[Document] | None:
+    def get_all_documents(self, project_id: int) -> list[Document] | None:
         """Executing query for getting all documents"""
         query: Select = select(Document).where(Document.project_id == project_id)
 
@@ -43,16 +41,21 @@ class DocumentRepository:
             self.session.rollback()
             return None
 
-    def upload_documents(self, project_id: int, user_id: int, docs: List[Document]) -> List[Document] | None:
+    def upload_documents(
+        self, project_id: int, user_id: int, doc_data: list[dto.DocumentCreate]
+    ) -> list[Document] | None:
         """Uploads one or more documents in one transaction."""
-        try:
-            for doc in docs:
-                self.create_document(project_id, doc.file_name, doc.file_path)
-            self.session.commit()
-            return docs
-        except Exception:
-            self.session.rollback()  # Rollback the transaction if any error occurs
-            raise HTTPException(status_code=500, detail="Error uploading document")
+
+        def dto_to_model(dto_doc: dto.DocumentCreate) -> Document:
+            """Convert a DocumentCreate DTO to a Document model."""
+            doc_dict = dto_doc.model_dump()
+            return Document(**doc_dict)
+
+        docs = [dto_to_model(model) for model in doc_data]
+
+        for doc in docs:
+            self.create_document(project_id, doc.file_name, doc.file_path)
+        return docs
 
     def update_document(self, document_id: int, file_name: str, file_path: str) -> Document | None:
         """Updates a document by ID and returns True if updated, False if not found."""
@@ -90,14 +93,13 @@ class DocumentRepository:
         result = self.session.execute(query)
         return result.scalar() is not None
 
-    def has_permission_proj(
-        self, project_id: int, curr_user_id: int, roles: tuple[UserRole, ...] = (UserRole.OWNER, UserRole.PARTICIPANT)
-    ) -> bool:
-        query: Select = (
-            select(Permission)
-            .where(Permission.project_id == project_id, Permission.user_id == curr_user_id)
-            .where(Permission.user_role.in_(roles))
+    def has_permission_proj(self, project_id: int, curr_user_id: int, roles: tuple[UserRole, ...]) -> bool:
+        query: Select = select(Permission).where(
+            Permission.project_id == project_id, Permission.user_id == curr_user_id
         )
+
+        if roles:
+            query = query.where(Permission.user_role.in_(roles))
 
         result = self.session.execute(query)
         return result.scalar() is not None

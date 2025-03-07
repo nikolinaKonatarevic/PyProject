@@ -1,7 +1,3 @@
-from fastapi import Depends
-from sqlalchemy.orm import Session
-
-from src.database.sync_engine import get_db_session
 from src.exceptions import (
     AccessDeniedException,
     DeleteFailedException,
@@ -71,8 +67,3 @@ class ProjectService:
         if not perm:
             return False
         return True
-
-
-def get_project_service(db: Session = Depends(get_db_session)):
-    repository = ProjectRepository(db)
-    return ProjectService(repository)

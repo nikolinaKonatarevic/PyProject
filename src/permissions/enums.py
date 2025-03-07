@@ -1,13 +1,13 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class UserRole(Enum):
+class UserRole(StrEnum):
     OWNER = "owner"
     PARTICIPANT = "participant"
     NA = "n/a"
 
 
-class RequestStatus(Enum):
+class RequestStatus(StrEnum):
     PENDING = "pending"
     ACCEPTED = "accepted"
     REJECTED = "rejected"

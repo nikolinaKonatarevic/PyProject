@@ -15,8 +15,8 @@ class Permission(Base):
     request_status: Mapped[RequestStatus] = mapped_column(Enum(RequestStatus), nullable=False, comment="Request Status")
 
     # relationships
-    user = relationship("User", back_populates="permissions")
-    project = relationship("Project", back_populates="permissions")
+    user = relationship("User", back_populates="permissions", overlaps="projects,users")
+    project = relationship("Project", back_populates="permissions", overlaps="users")
 
     def __repr__(self):
         return f"<Permission(project id = {self.id}, user id ={self.user_id})>"

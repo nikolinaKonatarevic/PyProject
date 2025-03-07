@@ -1,7 +1,7 @@
 from sqlalchemy import Delete, Insert, Select, Update, delete, insert, select, update
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from src.auth.auth import verify_password
 from src.permissions.enums import UserRole
 from src.permissions.models import Permission
 from src.users.models import User
@@ -18,36 +18,33 @@ class UserRepository:
         result = self.session.execute(query)
         return result.scalar_one_or_none()
 
-    def get_user_by_user_email(self, email: str) -> User | None:
+    def get_user_by_email(self, email: str) -> User | None:
         """Get one user by its email"""
         query: Select = select(User).where(User.email == email)
 
         result = self.session.execute(query)
         return result.scalar_one_or_none()
 
-    def update_user(self, user_id: int, email: str, password: str) -> User | None:
+    def update_user(self, user_id: int, email: str, password_hash: str) -> User | None:
         """Updates a user by ID and returns True if updated, False if not found."""
-        query: Update = update(User).where(User.id == user_id).values(email=email, password=password).returning(User)
+        query: Update = (
+            update(User).where(User.id == user_id).values(email=email, password_hash=password_hash).returning(User)
+        )
 
-        try:
-            result = self.session.execute(query)
+        result = self.session.execute(query)
+        if result:
             self.session.commit()
-            return result.scalar_one_or_none()
-        except IntegrityError:
-            self.session.rollback()
-            return None
+        return result.scalar_one_or_none()
 
-    def create_user(self, email: str, password: str) -> User | None:
+    def create_user(self, email: str, password_hash: str) -> User | None:
         """Inserts a new user and returns the created User object."""
-        query: Insert = insert(User).values(email=email, password=password).returning(User)
 
-        try:
-            result = self.session.execute(query)
-            self.session.commit()
-            return result.scalar_one_or_none()
-        except IntegrityError:
-            self.session.rollback()
-            return None
+        query: Insert = insert(User).values(email=email, password_hash=password_hash).returning(User)
+
+        result = self.session.execute(query)
+
+        self.session.commit()
+        return result.scalar_one_or_none()
 
     def delete_user(self, user_id: int) -> bool:
         """Deletes a user by ID and returns True if deleted, False otherwise."""
@@ -67,3 +64,11 @@ class UserRepository:
 
         result = self.session.execute(query)
         return result.scalar() is not None
+
+    def authenticate_user(self, email: str, password: str) -> User | None:
+        user = self.get_user_by_email(email)
+        if not user:
+            return None
+        if not verify_password(password, user.password_hash):
+            return None
+        return user

@@ -1,5 +1,3 @@
-from typing import List
-
 from sqlalchemy import Delete, Insert, Select, Update, delete, insert, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -27,7 +25,7 @@ class ProjectRepository:
         result = self.session.execute(query)
         return result.scalar_one_or_none()
 
-    def get_all_projects(self) -> List[Project] | None:
+    def get_all_projects(self) -> list[Project] | None:
         """Executing query for getting all projects"""
         query: Select = select(Project)
 
@@ -82,7 +80,7 @@ class ProjectRepository:
 
     def get_projects_for_user(
         self, user_id: int, roles: tuple[UserRole, ...] = (UserRole.OWNER, UserRole.PARTICIPANT)
-    ) -> List[Project] | None:
+    ) -> list[Project] | None:
         """
         Returns a list of projects where user has a certain role.
         """

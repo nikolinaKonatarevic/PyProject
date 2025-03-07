@@ -3,6 +3,7 @@ FROM python:3.12-alpine AS builder
 ENV PYTHONUNBUFFERED=1
 ENV POETRY_NO_INTERACTION=1
 ENV POETRY_VIRTUALENVS_CREATE=false
+ENV PYTHONPATH=/app
 
 RUN apk add --no-cache bash util-linux gcc musl-dev linux-headers libpq libffi-dev
 
@@ -10,6 +11,7 @@ RUN apk add --no-cache bash util-linux gcc musl-dev linux-headers libpq libffi-d
 RUN pip install --upgrade pip poetry==1.8.3 && \
     apk add --no-cache netcat-openbsd
 
+WORKDIR /app
 COPY poetry.lock pyproject.toml ./
 
 RUN poetry lock &&  \
@@ -21,6 +23,7 @@ FROM python:3.12-alpine  as runtime
 WORKDIR /app
 
 COPY entrypoint.sh /entrypoint.sh
+COPY src/config.py /config.py
 
 RUN chmod +x /entrypoint.sh
 
@@ -34,5 +37,7 @@ COPY --from=builder /usr/local/bin /usr/local/bin
 COPY --from=builder /usr/bin /usr/bin
 COPY --from=builder /usr/lib/lib* /usr/lib/
 COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY ./alembic.ini /app/alembic.ini
+COPY ./alembic /app/alembic
 
 ENTRYPOINT ["sh", "/entrypoint.sh"]

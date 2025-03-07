@@ -46,3 +46,9 @@ class DeleteFailedException(Exception):
     def __init__(self, message="Failed to delete data"):
         self.message = message
         super().__init__(message)
+
+
+class InvalidInputException(Exception):
+    def __init__(self, message="Invalid data input"):
+        self.message = message
+        super().__init__(message)

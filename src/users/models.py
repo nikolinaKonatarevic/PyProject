@@ -8,11 +8,11 @@ class User(Base):
     __tablename__ = "users"
 
     email: Mapped[str] = mapped_column(String, unique=True, index=True, nullable=False, comment="User Email")
-    password: Mapped[str] = mapped_column(String, nullable=False, comment="User Password")
+    password_hash: Mapped[str] = mapped_column(String, nullable=False, comment="User Hash Password")
 
     # relationships
-    projects = relationship("Project", back_populates="users")
-    permissions = relationship("Permission", back_populates="users")
+    projects = relationship("Project", secondary="permissions", back_populates="users", overlaps="project,permission")
+    permissions = relationship("Permission", back_populates="user", overlaps="projects,users")
 
     def __repr__(self):
         return f"<User(id={self.id}, email={self.email})>"
