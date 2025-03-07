@@ -9,16 +9,17 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
+    repeat_password: str
 
 
 class UserUpdate(UserBase):
     id: int
-    password: str
+    password_hash: str
 
 
 class User(UserBase):
     id: int
-    password: str
+    password_hash: str
     created_at: datetime
     updated_at: datetime
 
@@ -31,4 +32,8 @@ class UsersPaginated(BaseModel):
     per_page: int
     total_users: int
     total_pages: int
-    # users: List[User]
+    users: list[User]
+
+
+class UserInDB(UserBase):
+    password_hash: str
