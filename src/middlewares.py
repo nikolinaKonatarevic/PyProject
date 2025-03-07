@@ -39,7 +39,7 @@ class ExceptionHandlerMiddleware(BaseHTTPMiddleware):
         except PostFailedException as e:
             return JSONResponse(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                content={"error": "Internal Server Error", "message": str(e.message)},
+                content={"error": "Internal Server Error - Post", "message": str(e.message)},
             )
         except UpdateFailedException as e:
             return JSONResponse(
@@ -61,7 +61,3 @@ class ExceptionHandlerMiddleware(BaseHTTPMiddleware):
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 content={"error": "Internal Server Error", "message": "An unexpected error occurred."},
             )
-
-
-def exception_handler_factory(app):
-    return ExceptionHandlerMiddleware(app)
