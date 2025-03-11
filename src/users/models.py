@@ -11,8 +11,8 @@ class User(Base):
     password_hash: Mapped[str] = mapped_column(String, nullable=False, comment="User Hash Password")
 
     # relationships
-    projects = relationship("Project", secondary="permissions", back_populates="users", overlaps="project,permission")
-    permissions = relationship("Permission", back_populates="user", overlaps="projects,users")
+    projects = relationship("Project", secondary="permissions", overlaps="project,permission")
+    permissions = relationship("Permission", overlaps="projects,users")
 
     def __repr__(self):
         return f"<User(id={self.id}, email={self.email})>"

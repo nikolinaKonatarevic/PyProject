@@ -14,7 +14,7 @@ class UserCreate(UserBase):
 
 class UserUpdate(UserBase):
     id: int
-    password_hash: str
+    password: str
 
 
 class User(UserBase):
