@@ -42,7 +42,7 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = settings.DB_URL
+    url = str(settings.postgres_dsn.unicode_string())
     config.set_main_option("sqlalchemy.url", url)
     context.configure(
         url=url,

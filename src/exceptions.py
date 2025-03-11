@@ -31,7 +31,7 @@ class InvalidDataFormatError(Exception):
 
 
 class PostFailedException(Exception):
-    def __init__(self, message="Failed to fetch data"):
+    def __init__(self, message="Failed to create data"):
         self.message = message
         super().__init__(message)
 
