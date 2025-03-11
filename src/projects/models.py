@@ -16,7 +16,7 @@ class Project(Base):
 
     # relationships
     owner = relationship("User")
-    documents = relationship("Document", back_populates="project")
+    documents = relationship("Document", backref="projects")
     users = relationship("User", secondary="permissions", back_populates="projects", overlaps="permissions")
     permissions = relationship("Permission", back_populates="project", overlaps="users")
 

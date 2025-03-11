@@ -6,61 +6,65 @@ from src.exceptions import (
     UpdateFailedException,
 )
 from src.permissions.enums import UserRole
-from src.projects import dto
+from src.projects import project_dto
 from src.projects.repositories import ProjectRepository
+from src.users import dto
 
 
 class ProjectService:
     def __init__(self, repository: ProjectRepository):
         self.repository = repository
 
-    def get_all_projects(self, user_id: int) -> list[dto.Project]:
-        result = self.repository.get_projects_for_user(user_id)
+    def get_all_projects(self, curr_user: dto.User) -> list[project_dto.Project]:
+        result = self.repository.get_projects_for_user(curr_user.id)
         if not result:
             raise NotFoundException()
-        return [dto.Project.model_validate(project) for project in result]
+        return [project_dto.Project.model_validate(project) for project in result]
 
-    def get_project_info(self, user_id: int, project_id: int) -> dto.Project:
+    def get_project_info(self, curr_user: dto.User, project_id: int) -> project_dto.Project:
+        if not self.repository.has_permission(project_id, curr_user.id):
+            raise AccessDeniedException()
+
         result = self.repository.get_project_by_project_id(project_id)
         if not result:
             raise NotFoundException()
-        if not self.repository.has_permission(project_id, user_id):
-            raise AccessDeniedException()
 
-        return dto.Project.model_validate(result)
+        return project_dto.Project.model_validate(result)
 
-    def create_project(self, project_data: dto.ProjectCreate, owner_id: int) -> dto.Project:
-        project = self.repository.create_project(project_data.name, project_data.description, owner_id)
+    def create_project(self, project_data: project_dto.ProjectCreate, curr_user: dto.User) -> project_dto.Project:
+        project = self.repository.create_project(project_data.name, project_data.description, curr_user.id)
         if not project:
             raise PostFailedException()
-        return dto.Project.model_validate(project)
+        return project_dto.Project.model_validate(project)
 
-    def update_project(self, project_id: int, user_id: int, project_data: dto.ProjectUpdate) -> dto.Project:
-        if not self.repository.get_project_by_project_id(project_id):
-            raise NotFoundException()
-
-        if not self.repository.has_permission(project_id, user_id):
+    def update_project(
+        self, project_id: int, curr_user: dto.User, project_data: project_dto.ProjectUpdate
+    ) -> project_dto.Project:
+        if not self.repository.has_permission(project_id, curr_user.id):
             raise AccessDeniedException()
 
-        result = self.repository.update_project(project_id, *project_data)
+        if not self.repository.get_project_by_project_id(project_id):
+            raise NotFoundException()
+        result = self.repository.update_project(project_id, **project_data.model_dump())
         if result is None:
             raise UpdateFailedException()
-        return dto.Project.model_validate(result)
+        return project_dto.Project.model_validate(result)
 
-    def delete_project(self, project_id: int, user_id: int) -> bool:
+    def delete_project(self, project_id: int, curr_user: dto.User) -> bool:
+        if not self.repository.has_permission(project_id, curr_user.id, (UserRole.OWNER,)):
+            raise AccessDeniedException()
+
         if not self.repository.get_project_by_project_id(project_id):
             raise NotFoundException()
 
-        if not self.repository.has_permission(project_id, user_id):
-            raise AccessDeniedException()
-
         result = self.repository.delete_project(project_id)
+
         if not result:
             raise DeleteFailedException()
         return result
 
-    def invite(self, project_id: int, user_id: int, owner_id: int) -> bool:
-        if not self.repository.has_permission(owner_id, project_id, (UserRole.OWNER,)):
+    def invite(self, project_id: int, user_id: int, curr_user: dto.User) -> bool:
+        if not self.repository.has_permission(curr_user.id, project_id, (UserRole.OWNER,)):
             raise AccessDeniedException()
 
         perm = self.repository.give_permission(project_id, user_id)

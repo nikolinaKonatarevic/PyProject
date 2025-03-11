@@ -9,8 +9,12 @@ from src.permissions.enums import RequestStatus, UserRole
 class Permission(Base):
     __tablename__ = "permissions"
 
-    project_id: Mapped[int] = mapped_column(Integer, ForeignKey("projects.id"), nullable=False, comment="Project ID")
-    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False, comment="User ID")
+    project_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("projects.id", ondelete="CASCADE"), nullable=False, comment="Project ID"
+    )
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, comment="User ID"
+    )
     user_role: Mapped[UserRole] = mapped_column(Enum(UserRole), nullable=False, comment="User Role")
     request_status: Mapped[RequestStatus] = mapped_column(Enum(RequestStatus), nullable=False, comment="Request Status")
 

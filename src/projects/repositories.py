@@ -2,6 +2,7 @@ from sqlalchemy import Delete, Insert, Select, Update, delete, insert, select, u
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from src.exceptions import PostFailedException
 from src.permissions.enums import RequestStatus, UserRole
 from src.permissions.models import Permission
 from src.projects.models import Project
@@ -36,14 +37,19 @@ class ProjectRepository:
     def create_project(self, name: str, description: str, owner_id: int) -> Project | None:
         """Creates a new project and returns the created Project object"""
         query: Insert = insert(Project).values(name=name, description=description, owner_id=owner_id).returning(Project)
-
         try:
             result = self.session.execute(query)
-            self.session.commit()
-            return result.scalar_one_or_none()
+            project = result.scalar_one_or_none()
+
+            if project:
+                self.give_permission(project.id, owner_id, UserRole.OWNER)
+                self.session.commit()
+                return project
+            return None
+
         except IntegrityError:
             self.session.rollback()
-            return None
+            raise PostFailedException(message="Failed to Post the Project to db")
 
     def update_project(self, project_id: int, name: str, description: str) -> Project | None:
         """Updates a project by ID and returns True if updated, False if not found."""
@@ -61,9 +67,10 @@ class ProjectRepository:
 
         result = self.session.execute(query)
 
-        if result.fetchone() > 0:
+        if result:
             self.session.commit()
             return True
+        self.session.rollback()
         return False
 
     def has_permission(
@@ -95,11 +102,12 @@ class ProjectRepository:
         projects = list(result.scalars().all())
         return projects if projects else None
 
-    def give_permission(self, project_id: int, user_id: int) -> Permission | None:
+    def give_permission(
+        self, project_id: int, user_id: int, user_role: UserRole = UserRole.PARTICIPANT
+    ) -> Permission | None:
         """
         Gives permission for the user on a specific project.
         """
-        user_role = UserRole.PARTICIPANT
         request_status = RequestStatus.ACCEPTED
 
         query: Insert = (
