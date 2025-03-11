@@ -21,10 +21,3 @@ class Project(ProjectBase):
 
     class Config:
         from_attributes = True
-
-
-class ProjectPaginated(BaseModel):
-    page: int
-    per_page: int
-    total_users: int
-    total_pages: int

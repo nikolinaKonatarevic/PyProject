@@ -23,7 +23,6 @@ FROM python:3.12-alpine  as runtime
 WORKDIR /app
 
 COPY entrypoint.sh /entrypoint.sh
-COPY src/config.py /config.py
 
 RUN chmod +x /entrypoint.sh
 
@@ -39,5 +38,6 @@ COPY --from=builder /usr/lib/lib* /usr/lib/
 COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 COPY ./alembic.ini /app/alembic.ini
 COPY ./alembic /app/alembic
+COPY ./tests /app/tests
 
 ENTRYPOINT ["sh", "/entrypoint.sh"]
