@@ -1,0 +1,63 @@
+name: "CI Workflow"
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+jobs:
+  lambda-deploy:
+    if: ${{ github.event.pull_request.merged == true }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Check out Git repository"
+        uses: actions/checkout@v4
+
+      - name: "Set up Python 3.10"
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10.6'
+      - name: "Install dependencies"
+        run: |
+          cd src/lambda
+          mkdir package
+          pip install \
+          --target=package \
+          --implementation cp \
+          --python-version 3.10 \
+          --only-binary=:all: --upgrade \
+          pillow boto3
+
+      - name: "Creating zip files"
+        run: |
+          cd src/lambda
+          cp lambda_function.py package/
+          cd package
+          zip -r ../lambda_function.zip .
+
+
+      - name: "Deploy to AWS"
+        uses: appleboy/lambda-action@v0.1.9
+        with:
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_region: ${{ secrets.AWS_DEFAULT_REGION }}
+          function_name: ${{ secrets.AWS_LAMBDA_FUNCTION_NAME }}
+          zip_file: src/lambda/lambda_function.zip
+          runtime: python3.10
+
+  deploy-ecs:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Check out Git repository"
+        uses: actions/checkout@v4
+
+      - name: "AWS credentials"
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
+
+      - name: "Deploy to ECS"
+        run: |
+          aws ecs update-service --cluster ${{ secrets.ECS_CLUSTER }} --service ${{ secrets.ECS_SERVICE }} --force-new-deployment
