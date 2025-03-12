@@ -67,7 +67,7 @@ jobs:
 
       - name: "Deploy on EC2"
         run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/ssh-key-pyproject.pem ubuntu@${{secrets.EC2_IP_ADDRESS}} << 'EOF'
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/ssh-key-pyproject.pem ubuntu@${{secrets.EC2_IP_ADDRESS}}
           cd /home/ubuntu/pyproject/PyProject
           git pull
           docker compose build
