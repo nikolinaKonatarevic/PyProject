@@ -1,8 +1,8 @@
 name: "CI Workflow"
-on:
-  pull_request:
-    types: [closed]
-    branches: [main]
+on: [push]
+#  pull_request:
+#    types: [closed]
+#    branches: [main]
 jobs:
   lambda-deploy:
     if: ${{ github.event.pull_request.merged == true }}
