@@ -1,9 +1,9 @@
-from sqlalchemy import Delete, Insert, Select, Update, delete, insert, select, update
+from sqlalchemy import Delete, Insert, Select, Update, delete, func, insert, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from src.documents import dto
 from src.documents.models import Document
+from src.exceptions import PostFailedException
 from src.permissions.enums import UserRole
 from src.permissions.models import Permission
 from src.projects.models import Project
@@ -38,29 +38,30 @@ class DocumentRepository:
             result = self.session.execute(query)
             return result.scalar_one_or_none()
         except IntegrityError:
-            self.session.rollback()
+            raise PostFailedException("Unsuccessful creation of document in db")
+
+    def upload_documents(self, project_id: int, user_id: int, doc_data: list) -> list[Document] | None:
+        """Uploads one or more documents in one transaction."""
+        if not doc_data:
             return None
 
-    def upload_documents(
-        self, project_id: int, user_id: int, doc_data: list[dto.DocumentCreate]
-    ) -> list[Document] | None:
-        """Uploads one or more documents in one transaction."""
+        documents = [
+            {"project_id": project_id, "file_name": doc["file_name"], "file_path": doc["file_path"], "url": doc["url"]}
+            for doc in doc_data
+        ]
 
-        def dto_to_model(dto_doc: dto.DocumentCreate) -> Document:
-            """Convert a DocumentCreate DTO to a Document model."""
-            doc_dict = dto_doc.model_dump()
-            return Document(**doc_dict)
+        query: Insert = insert(Document).values(documents).returning(Document)
 
-        docs = [dto_to_model(model) for model in doc_data]
+        result = self.session.execute(query)
+        if result:
+            self.session.commit()
+        self.session.rollback()
+        return list(result.scalars().all()) if result else None
 
-        for doc in docs:
-            self.create_document(project_id, doc.file_name, doc.file_path)
-        return docs
-
-    def update_document(self, document_id: int, file_name: str, file_path: str) -> Document | None:
+    def update_document(self, document_id: int, file_name: str, file_path: str, url: str) -> Document | None:
         """Updates a document by ID and returns True if updated, False if not found."""
         query: Update = (
-            update(Document).where(Document.id == document_id).values(file_name=file_name, file_path=file_path)
+            update(Document).where(Document.id == document_id).values(file_name=file_name, file_path=file_path, url=url)
         )
 
         result = self.session.execute(query)
@@ -103,3 +104,8 @@ class DocumentRepository:
 
         result = self.session.execute(query)
         return result.scalar() is not None
+
+    def count_docs(self, project_id: int) -> int:
+        query = select(func.count()).select_from(Document).where(Document.project_id == project_id)
+        result = self.session.execute(query).scalar()
+        return result

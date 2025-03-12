@@ -25,6 +25,7 @@ def upgrade() -> None:
         sa.Column("id", sa.Integer, primary_key=True, nullable=False),
         sa.Column("file_name", sa.String(25), nullable=False),
         sa.Column("file_path", sa.String(100), nullable=False),
+        sa.Column("url", sa.String(100), nullable=False),
         sa.Column("created_at", sa.DateTime, server_default=sa.func.now()),
         sa.Column("updated_at", sa.DateTime, server_default=sa.func.now(), onupdate=sa.func.now()),
         sa.Column("project_id", sa.Integer, nullable=False),

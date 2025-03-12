@@ -17,5 +17,4 @@ def read_root():
 
 # Run the server using Uvicorn
 if __name__ == "__main__":
-    # print("I am in main")
     uvicorn.run(app, host="0.0.0.0", port=8000)

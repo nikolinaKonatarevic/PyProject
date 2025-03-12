@@ -21,7 +21,7 @@ class MyOAuthPasswordBearer(OAuth2PasswordBearer):
 
 
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
-oauth2_scheme = MyOAuthPasswordBearer(tokenUrl="/login")
+oauth2_scheme = MyOAuthPasswordBearer(tokenUrl="/v1/users/login")
 
 
 def verify_password(password: str, password_hash: str) -> bool:
@@ -35,7 +35,7 @@ def get_password_hash(password):
 def get_auth_scheme_token(auth_header_value: str | None) -> tuple[str, str]:
     if not auth_header_value:
         return "", ""
-    scheme, x, token = auth_header_value.partition(" ")
+    scheme, _, token = auth_header_value.partition(" ")
     return scheme, token
 
 

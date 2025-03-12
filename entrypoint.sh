@@ -16,7 +16,7 @@ echo "Migrations complete"
 
 # Start the FastAPI server
 if [ "${TEST}" = "True" ]; then
-    pytest
+    pytest --cov=src tests/
 else
     uvicorn src.main:app --host 0.0.0.0
 fi

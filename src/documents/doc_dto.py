@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel
 
 
@@ -20,3 +22,10 @@ class Document(DocumentBase):
 
     class Config:
         from_attributes = True
+
+
+class PaginatedDocuments(BaseModel):
+    documents: Optional[list[Document]]
+    count: Optional[int]
+    next: Optional[int]
+    prev: Optional[int]

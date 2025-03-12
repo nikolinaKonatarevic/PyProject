@@ -1,12 +1,9 @@
 from datetime import timedelta
-from typing import Annotated
 
-from fastapi.params import Depends
 from fastapi.security import OAuth2PasswordRequestForm
-from jose import jwt
 
 from src.auth import token
-from src.auth.auth import create_access_token, get_password_hash, oauth2_scheme
+from src.auth.auth import create_access_token, get_password_hash
 from src.config import settings
 from src.exceptions import (
     AuthenticationError,
@@ -55,19 +52,7 @@ class UserService:
         user = self.repository.authenticate_user(login_data.username, login_data.password)
         if not user:
             raise AuthenticationError()
+
         access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         access_token = create_access_token(data={"sub": user.email}, expires_delta=access_token_expires)
         return token.Token(access_token=access_token, token_type="bearer")
-
-    def get_curr_user(
-        self,
-        token_user: Annotated[str, Depends(oauth2_scheme)],
-    ) -> dto.User:
-        payload = jwt.decode(token_user, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-        user_id = payload.get("id")
-        if not user_id:
-            raise AuthenticationError()
-        user = self.repository.get_user_by_user_id(user_id)
-        if not user:
-            raise AuthenticationError()
-        return dto.User.model_validate(user)
