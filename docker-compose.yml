@@ -1,5 +1,6 @@
 services:
   backend:
+    image: backend
     container_name: backend_api
     restart: always
     build: ./

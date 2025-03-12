@@ -1,7 +1,7 @@
 from starlette.testclient import TestClient
 
-from src.projects import project_dto
-from src.users import dto
+from src.api.projects import dto as project_dto
+from src.api.users import dto
 
 
 # GET

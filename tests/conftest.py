@@ -7,15 +7,16 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session, sessionmaker
 from starlette.testclient import TestClient
 
-from src.auth.auth import create_access_token
-from src.config import settings
-from src.database.base_model import Base
-from src.deps import get_project_service, get_user_service
+from src.api.auth.auth import create_access_token
+from src.api.config import settings
+from src.api.database.base_model import Base
+from src.api.database.sync_engine import get_db_session
+from src.api.deps import get_project_service, get_user_service
+from src.api.projects import dto as project_dto
+from src.api.projects.services import ProjectService
+from src.api.users import dto
+from src.api.users.services import UserService
 from src.main import app
-from src.projects import project_dto
-from src.projects.services import ProjectService
-from src.users import dto
-from src.users.services import UserService
 
 test_engine = create_engine(settings.postgres_dsn.unicode_string())
 
@@ -30,7 +31,7 @@ def test_get_db_session():
 
 
 # ERROR!tests/conftest.py:13: error: Module "src.database.sync_engine" has no attribute "get_db_session"  [attr-defined]
-# app.dependency_overrides[get_db_session] = test_get_db_session
+app.dependency_overrides[get_db_session()] = test_get_db_session
 
 
 @pytest.fixture(scope="function")
@@ -78,13 +79,15 @@ def user_factory() -> Callable[..., dto.User]:
         user = dto.UserCreate(email=email, password="12345678", repeat_password="12345678")
         return user_service.create_user(user)
 
-    # ERROR ! AttributeError: 'Depends' object has no attribute 'execute'
+    # ERROR ! AttributeError: 'Depends' object has no attribute 'execute' ---
+    # not possible to use it here; I can avoid hints
+    # don't use functionality; just execute directly to db
 
     return _create_test_user
 
 
 @pytest.fixture(scope="function")
-def test_user(user_factory: Callable[..., dto.User]) -> dto.User:
+def create_test_user(user_factory: Callable[..., dto.User]) -> dto.User:
     return user_factory("test")
 
 

@@ -1,8 +1,8 @@
 import uvicorn
 from fastapi import FastAPI
 
-from src.api.v1 import v1_router
-from src.middlewares import ExceptionHandlerMiddleware
+from src.api.middlewares import ExceptionHandlerMiddleware
+from src.api.routers.v1 import v1_router
 
 app = FastAPI()
 
