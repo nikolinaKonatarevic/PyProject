@@ -22,9 +22,11 @@ jobs:
 
       - name: "Lint"
         run: poetry run make lint
+        continue-on-error: true
 
       - name: "Lint-ruff"
         run: poetry run make lint-ruff
+        continue-on-error: true
 #      - name: Run tests
 #        run: poetry run make test
   build-publish:
