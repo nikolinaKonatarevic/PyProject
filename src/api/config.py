@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     AWS_DEFAULT_REGION: str
     AWS_ACCESS_KEY_ID: str
     AWS_SECRET_ACCESS_KEY: str
-    postgres_dsn: PostgresDsn
+    postgres_dsn: PostgresDsn | None = None
 
     @field_validator("postgres_dsn", mode="before")  # noqa
     @classmethod
