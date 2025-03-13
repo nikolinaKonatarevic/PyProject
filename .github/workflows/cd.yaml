@@ -23,16 +23,16 @@ jobs:
           pip install \
           --target=package\
           --implementation cp \
-          --python-version 3.10 \
+          --python-version 3.12 \
           --only-binary=:all: --upgrade \
-          pillow boto3 fastapi
+          pillow
 
       - name: "Creating zip files"
         run: |
-          cd src/lambda
-          cp lambda_function.py package/
-          cd package
+          cd lambda_handlers/package
           zip -r ../lambda_function.zip .
+          cd ..
+          zip lambda_function.zip lambda_function.py
 
       - name: "Deploy to AWS"
         uses: appleboy/lambda-action@v0.1.9
@@ -42,7 +42,7 @@ jobs:
           aws_region: ${{ secrets.AWS_DEFAULT_REGION }}
           function_name: ${{ secrets.AWS_LAMBDA_FUNCTION_NAME }}
           zip_file: src/lambda/lambda_function.zip
-          runtime: python3.10
+          runtime: python3.12
 
   deploy-ecs:
     if: ${{ github.event.pull_request.merged == true }}
