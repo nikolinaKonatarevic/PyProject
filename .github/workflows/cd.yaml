@@ -29,10 +29,10 @@ jobs:
 
       - name: "Creating zip files"
         run: |
-          cd src/lambda/package
+          cd ./src/lambda
+          cp lambda_function.py package/
+          cd package
           zip -r ../lambda_function.zip .
-          cd ..
-          zip lambda_function.zip lambda_function.py
 
       - name: "Deploy to AWS"
         uses: appleboy/lambda-action@v0.1.9
