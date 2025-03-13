@@ -29,7 +29,7 @@ jobs:
 
       - name: "Creating zip files"
         run: |
-          cd lambda/package
+          cd src/lambda/package
           zip -r ../lambda_function.zip .
           cd ..
           zip lambda_function.zip lambda_function.py
