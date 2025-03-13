@@ -2,7 +2,6 @@ import os
 from urllib.parse import unquote_plus
 
 import boto3
-from fastapi import UploadFile
 from PIL.Image import Image
 
 
@@ -10,7 +9,7 @@ class S3Client:
     def __init__(self):
         self.client = boto3.client("s3")
 
-    def upload(self, doc: UploadFile, file_path: str) -> str:
+    def upload(self, doc, file_path: str) -> str:
         self.client.upload_fileobj(doc.file, os.environ["AWS_BUCKET_NAME"], f"{file_path}/{doc.filename}")
 
         url = (
