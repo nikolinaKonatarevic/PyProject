@@ -85,16 +85,17 @@ class DocumentService:
             raise AccessDeniedException()
 
         documents_list = []
+        file_path = "unproccessed"
 
         for doc in doc_data:
-            file_path = "unproccessed"
             url = s3_client.upload(doc, file_path)
-
             document_info = {"file_name": doc.filename, "file_path": file_path, "url": url}
             documents_list.append(document_info)
 
         result = self.repository.upload_documents(project_id, curr_user.id, documents_list)
 
         if not result:
+            for doc in doc_data:
+                s3_client.delete(doc.filename, file_path)
             raise PostFailedException()
         return [doc_dto.Document.model_validate(project) for project in result]

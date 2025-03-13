@@ -14,8 +14,8 @@ class S3Client:
         self.client.upload_fileobj(doc.file, os.environ["AWS_BUCKET_NAME"], f"{file_path}/{doc.filename}")
 
         url = (
-            f"https://{os.environ["AWS_BUCKET_NAME"]}.s3"
-            f".{os.environ["AWS_DEFAULT_REGION"]}.amazonaws.com/{file_path}/{doc.filename}"
+            f"https://{os.environ['AWS_BUCKET_NAME']}.s3"
+            f".{os.environ['AWS_DEFAULT_REGION']}.amazonaws.com/{file_path}/{doc.filename}"
         )
         return url
 
