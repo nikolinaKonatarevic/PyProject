@@ -21,11 +21,11 @@ jobs:
           cd ./src/lambda
           mkdir package
           pip install \
-          --target=package boto3 pillow fastapi\
+          --target=package\
           --implementation cp \
           --python-version 3.10 \
           --only-binary=:all: --upgrade \
-          pillow boto3
+          pillow boto3 fastapi
 
       - name: "Creating zip files"
         run: |
