@@ -25,11 +25,11 @@ jobs:
           --implementation cp \
           --python-version 3.12 \
           --only-binary=:all: --upgrade \
-          pillow
+          pillow boto3
 
       - name: "Creating zip files"
         run: |
-          cd lambda_handlers/package
+          cd lambda/package
           zip -r ../lambda_function.zip .
           cd ..
           zip lambda_function.zip lambda_function.py
