@@ -11,13 +11,6 @@ authors = ["Nikica"]
 [tool.poetry.dependencies]
 python = "^3.12"
 python-multipart = "^0.0.20"
-pytest-cov = "^6.0.0"
-httpx = "^0.28.1"
-boto3 = "^1.37.10"
-
-
-
-
 
 [tool.poetry.group.api]
 optional = true

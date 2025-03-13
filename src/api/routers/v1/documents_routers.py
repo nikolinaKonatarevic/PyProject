@@ -3,7 +3,8 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Query, UploadFile
 from starlette import status
 
-from src.api.deps import get_document_service
+from src.api.aws.s3 import S3Client
+from src.api.deps import get_document_service, get_s3_client
 from src.api.documents import dto as doc_dto
 from src.api.documents.services import DocumentService
 from src.api.users import dto
@@ -29,8 +30,9 @@ def upload_documents(
     curr_user: Annotated[dto.User, Depends(get_curr_user)],
     doc_data: list[UploadFile],
     document_service: DocumentService = Depends(get_document_service),
+    s3_client: S3Client = Depends(get_s3_client),
 ) -> list[doc_dto.Document]:
-    return document_service.upload_documents(project_id, curr_user, doc_data)
+    return document_service.upload_documents(project_id, curr_user, doc_data, s3_client)
 
 
 @document_router.get("/document/{document_id}", status_code=status.HTTP_200_OK)
@@ -38,8 +40,9 @@ def download_document(
     curr_user: Annotated[dto.User, Depends(get_curr_user)],
     document_id: int,
     document_service: DocumentService = Depends(get_document_service),
+    s3_client: S3Client = Depends(get_s3_client),
 ):
-    return document_service.download_document(document_id, curr_user)
+    return document_service.download_document(document_id, curr_user, s3_client)
 
 
 @document_router.patch("/document/{document_id}", status_code=status.HTTP_200_OK)
@@ -48,8 +51,9 @@ def update_document(
     document_id: int,
     document_updated: UploadFile,
     document_service: DocumentService = Depends(get_document_service),
+    s3_client: S3Client = Depends(get_s3_client),
 ) -> doc_dto.Document:
-    return document_service.update_document(document_id, curr_user, document_updated)
+    return document_service.update_document(document_id, curr_user, document_updated, s3_client)
 
 
 @document_router.delete("/document/{document_id}")
@@ -57,5 +61,6 @@ def delete_document(
     curr_user: Annotated[dto.User, Depends(get_curr_user)],
     document_id: int,
     document_service: DocumentService = Depends(get_document_service),
+    s3_client: S3Client = Depends(get_s3_client),
 ) -> bool:
-    return document_service.delete_document(document_id, curr_user)
+    return document_service.delete_document(document_id, curr_user, s3_client)

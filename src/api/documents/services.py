@@ -1,7 +1,7 @@
 from fastapi import UploadFile
 
+from src.api.aws.s3 import S3Client
 from src.api.documents import dto as doc_dto
-from src.api.documents import s3_client
 from src.api.documents.repositories import DocumentRepository
 from src.api.exceptions import (
     AccessDeniedException,
@@ -37,7 +37,7 @@ class DocumentService:
             raise NotFoundException()
         return doc_dto.PaginatedDocuments(documents=documents, count=num_of_docs, next=next_offset, prev=prev_offset)
 
-    def download_document(self, document_id: int, curr_user: dto.User) -> doc_dto.Document:
+    def download_document(self, document_id: int, curr_user: dto.User, s3_client: S3Client) -> doc_dto.Document:
         document = self.repository.has_permission_doc(document_id, curr_user.id)
         if not document:
             raise AccessDeniedException()
@@ -45,7 +45,9 @@ class DocumentService:
         result = s3_client.download(f"{document.file_name}", f"{document.file_path}")
         return result
 
-    def update_document(self, document_id: int, curr_user: dto.User, document_updated: UploadFile) -> doc_dto.Document:
+    def update_document(
+        self, document_id: int, curr_user: dto.User, document_updated: UploadFile, s3_client: S3Client
+    ) -> doc_dto.Document:
         if not self.repository.has_permission_doc(document_id, curr_user.id):
             raise AccessDeniedException()
 
@@ -61,7 +63,7 @@ class DocumentService:
             raise UpdateFailedException()
         return doc_dto.Document.model_validate(result)
 
-    def delete_document(self, document_id: int, curr_user: dto.User) -> bool:
+    def delete_document(self, document_id: int, curr_user: dto.User, s3_client: S3Client) -> bool:
         if not self.repository.has_permission_doc(document_id, curr_user.id):
             raise AccessDeniedException()
 
@@ -77,7 +79,7 @@ class DocumentService:
         return result
 
     def upload_documents(
-        self, project_id: int, curr_user: dto.User, doc_data: list[UploadFile]
+        self, project_id: int, curr_user: dto.User, doc_data: list[UploadFile], s3_client: S3Client
     ) -> list[doc_dto.Document]:
         if not self.repository.has_permission_proj(project_id, curr_user.id, (UserRole.OWNER, UserRole.PARTICIPANT)):
             raise AccessDeniedException()

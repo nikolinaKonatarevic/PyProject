@@ -1,4 +1,5 @@
-from sqlalchemy import Delete, Insert, Select, Update, delete, func, insert, select, update
+from sqlalchemy import Delete, Insert, Select, Update, delete, func, select, update
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -26,6 +27,7 @@ class DocumentRepository:
 
         result = self.session.execute(query)
         projects = list(result.scalars().all())
+
         return projects if projects else None
 
     def create_document(self, project_id: int, file_name: str, file_path: str) -> Document | None:
@@ -51,12 +53,21 @@ class DocumentRepository:
                 "file_name": doc["file_name"],
                 "file_path": doc["file_path"],
                 "url": doc["url"],
-                "owner_id": user_id,
             }
             for doc in doc_data
         ]
 
-        query: Insert = insert(Document).values(documents).returning(Document)
+        query: Insert = (
+            insert(Document)
+            .values(documents)
+            .on_conflict_do_update(
+                index_elements=["file_name"],  # Conflict on file_name
+                set_={
+                    "file_name": func.concat(Document.file_name, "_duplicate"),  # Append "_duplicate" to file_name
+                },
+            )
+            .returning(Document)
+        )
 
         result = self.session.execute(query)
         data = result.scalars().all()
