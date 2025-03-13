@@ -82,16 +82,16 @@ class DocumentService:
         if not self.repository.has_permission_proj(project_id, curr_user.id, (UserRole.OWNER, UserRole.PARTICIPANT)):
             raise AccessDeniedException()
 
-        document_urls = []
+        documents_list = []
 
         for doc in doc_data:
-            file_path = "unprocessed"
+            file_path = "unproccessed"
             url = s3_client.upload(doc, file_path)
-            document_urls.append(
-                {"url": url, "file_name": doc.filename, "file_path": file_path, "content_type": doc.content_type}
-            )
 
-        result = self.repository.upload_documents(project_id, curr_user.id, document_urls)
+            document_info = {"file_name": doc.filename, "file_path": file_path, "url": url}
+            documents_list.append(document_info)
+
+        result = self.repository.upload_documents(project_id, curr_user.id, documents_list)
 
         if not result:
             raise PostFailedException()

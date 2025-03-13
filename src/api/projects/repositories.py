@@ -6,6 +6,7 @@ from src.api.exceptions import PostFailedException
 from src.api.permissions.enums import RequestStatus, UserRole
 from src.api.permissions.models import Permission
 from src.api.projects.models import Project
+from src.api.users.models import User
 
 
 class ProjectRepository:
@@ -34,7 +35,7 @@ class ProjectRepository:
         projects = list(result.scalars().all())
         return projects if projects else None
 
-    def create_project(self, name: str, description: str, owner_id: int) -> Project | None:
+    def create_project(self, name: str, description: str, owner_id: int, owner_email: str) -> Project | None:
         """Creates a new project and returns the created Project object"""
         query: Insert = insert(Project).values(name=name, description=description, owner_id=owner_id).returning(Project)
         try:
@@ -42,7 +43,7 @@ class ProjectRepository:
             project = result.scalar_one_or_none()
 
             if project:
-                self.give_permission(project.id, owner_id, UserRole.OWNER)
+                self.give_permission(project.id, owner_email, UserRole.OWNER)
                 self.session.commit()
                 return project
 
@@ -103,16 +104,22 @@ class ProjectRepository:
         return projects
 
     def give_permission(
-        self, project_id: int, user_id: int, user_role: UserRole = UserRole.PARTICIPANT
+        self, project_id: int, user_email: str, user_role: UserRole = UserRole.PARTICIPANT
     ) -> Permission | None:
         """
         Gives permission for the user on a specific project.
         """
         request_status = RequestStatus.ACCEPTED
+        user_id_subquery = select(User.id).where(User.email == user_email).scalar_subquery()
 
         query: Insert = (
             insert(Permission)
-            .values(user_id=user_id, project_id=project_id, user_role=user_role, request_status=request_status)
+            .values(
+                user_id=user_id_subquery,
+                project_id=project_id,
+                user_role=user_role,
+                request_status=request_status,
+            )
             .returning(Permission)
         )
 
@@ -124,3 +131,9 @@ class ProjectRepository:
             self.session.rollback()
 
         return None
+
+    def exists(self, project_id: int) -> bool:
+        query: Select = select(Project).where(Project.id == project_id)
+
+        result = self.session.execute(query)
+        return result.scalar_one_or_none() is not None

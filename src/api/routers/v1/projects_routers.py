@@ -59,8 +59,8 @@ def delete_project(
 @project_router.post("/{project_id}/invite")
 def invite(
     curr_user: Annotated[dto.User, Depends(get_curr_user)],
-    user_id: int,
+    user_email: str,
     project_id: int,
     project_service: ProjectService = Depends(get_project_service),
 ) -> bool:
-    return project_service.invite(project_id, user_id, curr_user)
+    return project_service.invite(project_id, user_email, curr_user)

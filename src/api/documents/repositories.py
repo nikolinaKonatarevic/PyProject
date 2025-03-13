@@ -46,7 +46,13 @@ class DocumentRepository:
             return None
 
         documents = [
-            {"project_id": project_id, "file_name": doc["file_name"], "file_path": doc["file_path"], "url": doc["url"]}
+            {
+                "project_id": project_id,
+                "file_name": doc["file_name"],
+                "file_path": doc["file_path"],
+                "url": doc["url"],
+                "owner_id": user_id,
+            }
             for doc in doc_data
         ]
 

@@ -21,7 +21,7 @@ jobs:
           cd ./src/lambda
           mkdir package
           pip install \
-          --target=package \
+          --target=package boto3 pillow fastapi\
           --implementation cp \
           --python-version 3.10 \
           --only-binary=:all: --upgrade \
