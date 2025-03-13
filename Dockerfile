@@ -36,8 +36,6 @@ COPY --from=builder /usr/local/bin /usr/local/bin
 COPY --from=builder /usr/bin /usr/bin
 COPY --from=builder /usr/lib/lib* /usr/lib/
 COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
-COPY ./alembic.ini /app/alembic.ini
-COPY ./alembic /app/alembic
 COPY ./tests /app/tests
 
 ENTRYPOINT ["sh", "/entrypoint.sh"]

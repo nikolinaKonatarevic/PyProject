@@ -11,7 +11,7 @@ lint-ruff:
 	@pre-commit run ruff --all-files
 
 migrations:
-	@alembic upgrade head
+	@alembic -c src/alembic.ini upgrade head
 run:
 	@poetry run uvicorn src.main:app --host 0.0.0.0 --reload
 

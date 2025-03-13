@@ -1,6 +1,6 @@
 from starlette.testclient import TestClient
 
-from src.users import dto
+from src.api.users import dto
 
 
 # CREATE

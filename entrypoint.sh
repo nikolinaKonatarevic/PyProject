@@ -10,7 +10,7 @@ done
 echo "Database is up - executing command"
 
 echo "Running migrations..."
-alembic upgrade head
+alembic -c src/alembic.ini upgrade head
 echo "Migrations complete"
 
 
