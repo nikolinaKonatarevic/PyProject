@@ -9,12 +9,15 @@ class S3Client:
     def __init__(self):
         self.client = boto3.client("s3")
 
-    def upload(self, doc, file_path: str) -> str:
-        self.client.upload_fileobj(doc.file, os.environ['BUCKET_NAME'], f'{file_path}/{doc.filename}')
+    def upload(self, file_name:str,download_path: str, new_path: str) -> str:
+
+        file = self.download(file_name, download_path,new_path)
+
+        self.client.upload_fileobj(file, os.environ['BUCKET_NAME'], f'{new_path}/{file_name}')
 
         url = (
             f"https://{os.environ['BUCKET_NAME']}.s3"
-            f".{os.environ['DEFAULT_REGION']}.amazonaws.com/{file_path}/{doc.filename}"
+            f".{os.environ['DEFAULT_REGION']}.amazonaws.com/{new_path}/{file_name}"
         )
         return url
 
@@ -42,4 +45,4 @@ def lambda_handler(event, context):
             img.thumbnail((400, 400))
 
             img.save(tempfile)
-        s3_client.upload(record, "processed")
+        s3_client.upload(record, "proccessed")
