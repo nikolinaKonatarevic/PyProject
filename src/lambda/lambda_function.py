@@ -1,8 +1,8 @@
-
-from urllib.parse import unquote_plus
-from PIL.Image import Image
 import os
+from urllib.parse import unquote_plus
+
 import boto3
+from PIL.Image import Image
 
 
 class S3Client:
@@ -13,8 +13,8 @@ class S3Client:
         self.client.upload_fileobj(doc.file, os.environ["AWS_BUCKET_NAME"], f"{file_path}/{doc.filename}")
 
         url = (
-            f"https://{os.environ["AWS_BUCKET_NAME"]}.s3"
-            f".{os.environ["AWS_DEFAULT_REGION"]}.amazonaws.com/{file_path}/{doc.filename}"
+            f"https://{os.environ['AWS_BUCKET_NAME']}.s3"
+            f".{os.environ['AWS_DEFAULT_REGION']}.amazonaws.com/{file_path}/{doc.filename}"
         )
         return url
 
@@ -26,7 +26,6 @@ class S3Client:
 
     def delete(self, file_name: str, file_path: str) -> None:
         self.client.delete_object(Bucket=os.environ["AWS_BUCKET_NAME"], Key=f"{file_path}/{file_name}")
-
 
 
 def lambda_handler(event, context):

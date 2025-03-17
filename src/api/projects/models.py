@@ -18,7 +18,7 @@ class Project(Base):
     owner = relationship("User")
     documents = relationship("Document", backref="projects")
     users = relationship("User", secondary="permissions", back_populates="projects", overlaps="permissions")
-    permissions = relationship("Permission", overlaps="users")
+    permissions = relationship("Permission", back_populates="project", overlaps="users")
 
     def __repr__(self):
         return f"<Project(name: {self.name})>"

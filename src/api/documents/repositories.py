@@ -102,6 +102,7 @@ class DocumentRepository:
                 Permission.user_role.in_((UserRole.OWNER, UserRole.PARTICIPANT)),
             )
         )
+
         result = self.session.execute(query)
         return result.scalar() is not None
 
