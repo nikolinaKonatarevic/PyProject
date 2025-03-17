@@ -20,8 +20,7 @@ class S3Client:
 
     def download(self, file_name: str, file_path: str, download_path: str):
         result = self.client.download_file(
-            Bucket=os.environ["BUCKET_NAME"], Key=f"{file_path}/{file_name}", FileName=download_path
-        )
+            Bucket=os.environ["BUCKET_NAME"], Key=f"{file_path}/{file_name}", Filename= download_path)
         return result
 
     def delete(self, file_name: str, file_path: str) -> None:
@@ -36,7 +35,7 @@ def lambda_handler(event, context):
         [file_path, file_name] = key.split("/")
 
         tempfile = f"/tmp/{file_name}"
-        s3_client.download(file_name, file_path, tempfile)
+        s3_client.download(file_name, file_path, download_path=tempfile)
 
         s3_client.delete(file_name, tempfile)
         with Image.open(tempfile) as img:
