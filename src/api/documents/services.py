@@ -1,3 +1,5 @@
+import random
+
 from fastapi import UploadFile
 
 from src.api.aws.s3 import S3Client
@@ -53,11 +55,16 @@ class DocumentService:
 
         document = self.repository.get_document_by_doc_id(document_id)
         if not document:
+            print("no doc found")
             raise NotFoundException()
 
         s3_client.delete(f"{document.file_name}", f"{document.file_path}")
-        url = s3_client.upload(document_updated, str(document.file_path))
+        print("deleted doc")
+        random_number = random.randint(10000, 99999)
+        document_updated.filename = f"{random_number}_{document_updated.filename}"
 
+        url = s3_client.upload(document_updated, str(document.file_path))
+        print("iploaded doc")
         result = self.repository.update_document(document_id, document_updated.filename, document.file_path, url=url)
         if result is None:
             raise UpdateFailedException()
@@ -85,9 +92,11 @@ class DocumentService:
             raise AccessDeniedException()
 
         documents_list = []
+        file_path = "unproccessed"
 
         for doc in doc_data:
-            file_path = "unproccessed"
+            random_number = random.randint(10000, 99999)
+            doc.filename = f"{random_number}_{doc.filename}"
             url = s3_client.upload(doc, file_path)
 
             document_info = {"file_name": doc.filename, "file_path": file_path, "url": url}
