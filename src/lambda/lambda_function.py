@@ -10,7 +10,7 @@ class S3Client:
         self.client = boto3.client("s3")
 
     def upload(self, doc, file_path: str) -> str:
-        self.client.upload_fileobj(doc.file, os.environ["AWS_BUCKET_NAME"], f"{file_path}/{doc.filename}")
+        self.client.upload_fileobj(doc.file, os.environ['AWS_BUCKET_NAME'], f'{file_path}/{doc.filename}')
 
         url = (
             f"https://{os.environ['AWS_BUCKET_NAME']}.s3"
