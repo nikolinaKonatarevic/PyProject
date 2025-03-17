@@ -1,5 +1,5 @@
 from fastapi import UploadFile
-
+import random
 from src.api.aws.s3 import S3Client
 from src.api.documents import dto as doc_dto
 from src.api.documents.repositories import DocumentRepository
@@ -56,6 +56,9 @@ class DocumentService:
             raise NotFoundException()
 
         s3_client.delete(f"{document.file_name}", f"{document.file_path}")
+        random_number = random.randint(10000, 99999)
+        document_updated.filename = f"{random_number}_{document_updated.filename}"
+
         url = s3_client.upload(document_updated, str(document.file_path))
 
         result = self.repository.update_document(document_id, document_updated.filename, document.file_path, url=url)
@@ -85,16 +88,19 @@ class DocumentService:
             raise AccessDeniedException()
 
         documents_list = []
+        file_path = "unproccessed"
 
         for doc in doc_data:
-            file_path = "unproccessed"
+            random_number = random.randint(10000, 99999)
+            doc.filename = f"{random_number}_{doc.filename}"
             url = s3_client.upload(doc, file_path)
-
             document_info = {"file_name": doc.filename, "file_path": file_path, "url": url}
             documents_list.append(document_info)
 
         result = self.repository.upload_documents(project_id, curr_user.id, documents_list)
 
         if not result:
+            for doc in doc_data:
+                s3_client.delete(doc.filename, file_path)
             raise PostFailedException()
         return [doc_dto.Document.model_validate(project) for project in result]

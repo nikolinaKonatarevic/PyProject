@@ -15,7 +15,7 @@ WORKDIR /app
 COPY poetry.lock pyproject.toml ./
 
 RUN poetry lock &&  \
-    poetry install --no-root --all-extras --with dev,api,lambda
+    poetry install --no-root --all-extras --with dev,api
 
 
 FROM python:3.12-alpine  as runtime

@@ -60,23 +60,20 @@ class DocumentRepository:
         query: Insert = (
             insert(Document)
             .values(documents)
-            .on_conflict_do_update(
-                index_elements=["file_name"],  # Conflict on file_name
-                set_={
-                    "file_name": func.concat(Document.file_name, "_duplicate"),  # Append "_duplicate" to file_name
-                },
-            )
             .returning(Document)
         )
 
         result = self.session.execute(query)
+        self.session.commit()
         data = result.scalars().all()
         return data if data else None
 
     def update_document(self, document_id: int, file_name: str, file_path: str, url: str) -> Document | None:
         """Updates a document by ID and returns True if updated, False if not found."""
         query: Update = (
-            update(Document).where(Document.id == document_id).values(file_name=file_name, file_path=file_path, url=url)
+            update(Document).where(Document.id == document_id)
+            .values(file_name=file_name, file_path=file_path, url=url)
+            .returning(Document)
         )
 
         result = self.session.execute(query)
