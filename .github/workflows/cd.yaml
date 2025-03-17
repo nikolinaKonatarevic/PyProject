@@ -26,7 +26,7 @@ jobs:
           --implementation cp \
           --python-version 3.12 \
           --only-binary=:all: --upgrade \
-          pillow
+          pillow boto3
   
       - name: "Zip the package"
         run: |
