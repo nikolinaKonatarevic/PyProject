@@ -37,7 +37,7 @@ def lambda_handler(event, context):
         tempfile = f"/tmp/{file_name}"
         s3_client.download(file_name, file_path, download_path=tempfile)
 
-        s3_client.delete(file_name, tempfile)
+        s3_client.delete(file_name, file_path)
         with Image.open(tempfile) as img:
             img.thumbnail((400, 400))
 
