@@ -56,7 +56,6 @@ class DocumentService:
             raise NotFoundException()
 
         s3_client.delete(f"{document.file_name}", f"{document.file_path}")
-        print("deleted doc")
         random_number = random.randint(10000, 99999)
         document_updated.filename = f"{random_number}_{document_updated.filename}"
 

@@ -28,22 +28,22 @@ jobs:
           --only-binary=:all: --upgrade \
           pillow
   
-          - name: Zip the package
-            run: |
-              cd ./src/lambda/package
-              zip -r ../lambda_function.zip .
-              cd ..
-              zip lambda_function.zip lambda_function.py
-  
-          - name: Deploy to AWS Lambda
-            uses: appleboy/lambda-action@v0.1.9
-            with:
-              aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-              aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-              aws_region: ${{ secrets.AWS_DEFAULT_REGION }}
-              function_name: ${{ secrets.AWS_LAMBDA_FUNCTION_NAME }}
-              zip_file: lambda/lambda_function.zip
-            runtime: python3.12
+      - name: Zip the package
+        run: |
+          cd ./src/lambda/package
+          zip -r ../lambda_function.zip .
+          cd ..
+          zip lambda_function.zip lambda_function.py
+
+      - name: Deploy to AWS Lambda
+        uses: appleboy/lambda-action@v0.1.9
+        with:
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_region: ${{ secrets.AWS_DEFAULT_REGION }}
+          function_name: ${{ secrets.AWS_LAMBDA_FUNCTION_NAME }}
+          zip_file: lambda/lambda_function.zip
+        runtime: python3.12
 
   deploy-ecs:
     #if: ${{ github.event.workflow_run.conclusion == 'success' }}
