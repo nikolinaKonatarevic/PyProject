@@ -39,7 +39,7 @@ def lambda_handler(event, context):
 
         [file_path, file_name] = key.split("/")
         print (f"{file_path}  +++  {file_name}")
-        tempfile = f"/tmp/{file_name}"
+        tempfile = f"documents/{file_name}"
         s3_client.download(file_name, file_path, download_path=tempfile)
 
         s3_client.delete(file_name, file_path)
@@ -48,4 +48,4 @@ def lambda_handler(event, context):
             img.thumbnail((400, 400))
             print(f"save photo")
             img.save(tempfile)
-        s3_client.upload(file_name, "/tmp", "proccessed")
+        s3_client.upload(file_name, "documents", "proccessed")
