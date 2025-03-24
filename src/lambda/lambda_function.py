@@ -24,9 +24,9 @@ class S3Client:
 
     def download(self, file_name: str, file_path: str, download_path: str):
         print (f"download {file_path}  +++  {file_name} ++ {download_path}")
-        result = self.client.download_file(
+        self.client.download(
             Bucket=os.environ["BUCKET_NAME"], Key=f"{file_path}/{file_name}", Filename= download_path)
-        return result
+
 
     def delete(self, file_name: str, file_path: str) -> None:
         self.client.delete_object(Bucket=os.environ["BUCKET_NAME"], Key=f"{file_path}/{file_name}")
