@@ -35,7 +35,7 @@ def lambda_handler(event, context):
         key = unquote_plus(record["s3"]["object"]["key"])
 
         [file_path, file_name] = key.split("/")
-
+        print (f"{file_path}  +++  {file_name}")
         tempfile = f"/tmp/{file_name}"
         s3_client.download(file_name, file_path, download_path=tempfile)
 
