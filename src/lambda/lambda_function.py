@@ -23,6 +23,7 @@ class S3Client:
         return url
 
     def download(self, file_name: str, file_path: str, download_path: str):
+        print (f"download {file_path}  +++  {file_name} ++ {download_path}")
         result = self.client.download_file(
             Bucket=os.environ["BUCKET_NAME"], Key=f"{file_path}/{file_name}", Filename= download_path)
         return result
@@ -45,6 +46,6 @@ def lambda_handler(event, context):
 
         with Image.open(tempfile) as img:
             img.thumbnail((400, 400))
-
+            print(f"save photo")
             img.save(tempfile)
         s3_client.upload(file_name, "tmp", "proccessed")
