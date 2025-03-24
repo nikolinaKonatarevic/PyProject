@@ -66,44 +66,35 @@ def truncate_tables() -> None:
 
 # Creating mock data
 @pytest.fixture(scope="function")
-def test_projects(
+def create_test_projects(
     test_user: dto.User, project_services: ProjectService = Depends(get_project_service)
 ) -> list[project_dto.Project]:
     projects = [project_dto.ProjectCreate(name=f"project{i}", description=f"Description{i}") for i in range(3)]
     return [project_services.create_project(project, test_user) for project in projects]
 
 
-@pytest.fixture
-def user_factory() -> Callable[..., dto.User]:
-    def _create_test_user(email: str, user_service: UserService = Depends(get_user_service)) -> dto.User:
-        user = dto.UserCreate(email=email, password="12345678", repeat_password="12345678")
-        return user_service.create_user(user)
 
-    # ERROR ! AttributeError: 'Depends' object has no attribute 'execute' ---
-    # not possible to use it here; I can avoid hints
-    # don't use functionality; just execute directly to db
+@pytest.fixture(scope="function")
+def create_test_user(user_service: UserService = Depends(get_user_service)) -> dto.User:
+    user = dto.UserCreate(email="test@example.com", password="12345678", repeat_password="12345678")
+    return user_service.create_user(user)
 
-    return _create_test_user
+@pytest.fixture(scope="function")
+def create_unauthorized_user(user_service: UserService = Depends(get_user_service)) -> dto.User:
+    user = dto.UserCreate(email="uanuth@example.com", password="12345678", repeat_password="12345678")
+    return user_service.create_user(user)
 
 
 @pytest.fixture(scope="function")
-def create_test_user(user_factory: Callable[..., dto.User]) -> dto.User:
-    return user_factory("test")
+def create_invited_user(user_service: UserService = Depends(get_user_service)) -> dto.User:
+    user = dto.UserCreate(email="inv@example.com", password="12345678", repeat_password="12345678")
+    return user_service.create_user(user)
 
 
 @pytest.fixture(scope="function")
-def unauthorized_user(user_factory: Callable[..., dto.User]) -> dto.User:
-    return user_factory("unauthorized")
-
-
-@pytest.fixture(scope="function")
-def invited_user(user_factory: Callable[..., dto.User]) -> dto.User:
-    return user_factory("invited")
-
-
-@pytest.fixture
-def participant_user(user_factory: Callable[..., dto.User]) -> dto.User:
-    return user_factory("participant")
+def participant_user(user_service: UserService = Depends(get_user_service)) -> dto.User:
+    user = dto.UserCreate(email="part@example.com", password="12345678", repeat_password="12345678")
+    return user_service.create_user(user)
 
 
 # to add mock data for documents
@@ -129,8 +120,8 @@ def test_token(token_factory: Callable[..., str], test_user: dto.User) -> str:
 
 
 @pytest.fixture(scope="function")
-def unauthorized_token(token_factory: Callable[..., str], unauthorized_user: dto.User) -> str:
-    return token_factory(unauthorized_user)
+def unauthorized_token(token_factory: Callable[..., str], create_unauthorized_user: User) -> str:
+    return token_factory(create_unauthorized_user)
 
 
 @pytest.fixture

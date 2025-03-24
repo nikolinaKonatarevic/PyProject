@@ -2,7 +2,7 @@ import os
 from urllib.parse import unquote_plus
 
 import boto3
-from PIL.Image import Image
+from PIL import Image
 
 
 class S3Client:
