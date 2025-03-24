@@ -40,8 +40,9 @@ def lambda_handler(event, context):
         s3_client.download(file_name, file_path, download_path=tempfile)
 
         s3_client.delete(file_name, file_path)
+
         with Image.open(tempfile) as img:
             img.thumbnail((400, 400))
 
             img.save(tempfile)
-        s3_client.upload(record, "proccessed")
+        s3_client.upload(record, tempfile, "proccessed")
