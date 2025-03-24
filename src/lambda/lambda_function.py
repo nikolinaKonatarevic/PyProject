@@ -45,4 +45,4 @@ def lambda_handler(event, context):
             img.thumbnail((400, 400))
 
             img.save(tempfile)
-        s3_client.upload(record, tempfile, "proccessed")
+        s3_client.upload(file_name, "tmp", "proccessed")
