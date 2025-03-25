@@ -12,7 +12,6 @@ class S3Client:
     def upload(self, file_name:str, file_path: str, new_path: str):
         print(f"in the upload - {file_name} +++ {file_path} +++ {new_path}")
 
-        #self.download(file_name, file_path, f"{new_path}/{file_name}")
 
         self.client.upload_file(f"{file_path}/{file_name}", os.environ['BUCKET_NAME'], f'{new_path}/{file_name}')
 
