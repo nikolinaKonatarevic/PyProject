@@ -26,10 +26,13 @@ class S3Client:
         print (f"download {file_path}  +++  {file_name} ++ {download_path}")
         self.client.download(
             Bucket=os.environ["BUCKET_NAME"], Key=f"{file_path}/{file_name}", Filename= download_path)
+        print("downloading ended")
 
 
     def delete(self, file_name: str, file_path: str) -> None:
+        print("in the delete ")
         self.client.delete_object(Bucket=os.environ["BUCKET_NAME"], Key=f"{file_path}/{file_name}")
+        print("delete ended ")
 
 
 def lambda_handler(event, context):
@@ -48,4 +51,5 @@ def lambda_handler(event, context):
             img.thumbnail((400, 400))
             print(f"save photo")
             img.save(tempfile)
+        print("before last upload")
         s3_client.upload(file_name, "documents", "proccessed")
