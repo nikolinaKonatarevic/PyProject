@@ -65,6 +65,10 @@ def lambda_handler(event, context):
 
         print("before last upload")
 
-        s3_client.upload(file_name, "/tmp", "proccessed")
+        try:
+            s3_client.upload(file_name, "/tmp", "proccessed")
+        except Exception as e:
+            print(f"Error uploading the file: {e}")
+            return
 
         s3_client.delete(file_name, file_path)
