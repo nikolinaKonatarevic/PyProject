@@ -9,12 +9,12 @@ class S3Client:
     def __init__(self):
         self.client = boto3.client("s3")
 
-    def upload(self, file_name:str, download_path: str, new_path: str):
-        print(f"in the upload - {file_name} +++ {download_path} +++ {new_path}")
+    def upload(self, file_name:str, file_path: str, new_path: str):
+        print(f"in the upload - {file_name} +++ {file_path} +++ {new_path}")
 
-        self.download(file_name, download_path, new_path)
+        self.download(file_name, file_path, f"{new_path}/{file_name}")
 
-        self.client.upload_file(f"{download_path}/{file_name}", os.environ['BUCKET_NAME'], f'{new_path}/{file_name}')
+        self.client.upload_file(f"{file_path}/{file_name}", os.environ['BUCKET_NAME'], f'{new_path}/{file_name}')
 
 
     def download(self, file_name: str, file_path: str, new_path: str):
@@ -70,5 +70,4 @@ def lambda_handler(event, context):
         except Exception as e:
             print(f"Error uploading the file: {e}")
             return
-
         s3_client.delete(file_name, file_path)
