@@ -25,6 +25,8 @@ class S3Client:
             Key=f"{file_path}/{file_name}"
         )
 
+        os.makedirs(os.path.dirname(download_path), exist_ok=True)
+
         # Read file content and save it locally
         with open(download_path, "wb") as f:
             f.write(response["Body"].read())
