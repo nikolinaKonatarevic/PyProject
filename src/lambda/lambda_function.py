@@ -51,10 +51,17 @@ def lambda_handler(event, context):
 
         s3_client.download(file_name, file_path, new_path=tempfile)
 
-        with Image.open(tempfile) as img:
-            img.thumbnail((400, 400))
-            print(f"save photo")
-            img.save(tempfile)
+        if not os.path.exists(tempfile):
+            print(f"File {tempfile} does not exist!")
+
+        try:
+            with Image.open(tempfile) as img:
+                img.thumbnail((400, 400))  # Resize image
+                print(f"Image resized successfully.")
+                img.save(tempfile)  # Overwrite the file with the processed image
+        except Exception as e:
+            print(f"Error processing the image: {e}")
+            return
 
         print("before last upload")
 
