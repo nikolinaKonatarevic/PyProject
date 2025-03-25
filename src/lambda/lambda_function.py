@@ -24,7 +24,7 @@ class S3Client:
 
     def download(self, file_name: str, file_path: str, download_path: str):
         print (f"download {file_path}  +++  {file_name} ++ {download_path}")
-        self.client.download(
+        self.client.download_file(
             Bucket=os.environ["BUCKET_NAME"], Key=f"{file_path}/{file_name}", Filename= download_path)
         print("downloading ended")
 
