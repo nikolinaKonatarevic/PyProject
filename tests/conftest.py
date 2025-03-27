@@ -2,20 +2,16 @@ from datetime import timedelta
 from typing import Callable, Generator
 
 import pytest
-from fastapi import Depends
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine, text, Insert, insert
 from sqlalchemy.orm import Session, sessionmaker
 from starlette.testclient import TestClient
 
-from src.api.auth.auth import create_access_token
+from src.api.auth.auth import create_access_token, get_password_hash
 from src.api.config import settings
 from src.api.database.base_model import Base
 from src.api.database.sync_engine import get_db_session
-from src.api.deps import get_project_service, get_user_service
-from src.api.projects import dto as project_dto
-from src.api.projects.services import ProjectService
-from src.api.users import dto
-from src.api.users.services import UserService
+from src.api.projects.models import Project
+from src.api.users.models import User
 from src.main import app
 
 test_engine = create_engine(settings.postgres_dsn.unicode_string())
@@ -66,44 +62,61 @@ def truncate_tables() -> None:
 
 # Creating mock data
 @pytest.fixture(scope="function")
-def test_projects(
-    test_user: dto.User, project_services: ProjectService = Depends(get_project_service)
-) -> list[project_dto.Project]:
-    projects = [project_dto.ProjectCreate(name=f"project{i}", description=f"Description{i}") for i in range(3)]
-    return [project_services.create_project(project, test_user) for project in projects]
+def create_test_projects(
+    db: Session,
+    create_test_user: User
+) -> list[Project]:
+    projects = [Project(name=f"project{i}", description=f"Description{i}") for i in range(3)]
 
+    query: Insert = (insert(Project).values(projects)
+                     .returning(Project))
 
-@pytest.fixture
-def user_factory() -> Callable[..., dto.User]:
-    def _create_test_user(email: str, user_service: UserService = Depends(get_user_service)) -> dto.User:
-        user = dto.UserCreate(email=email, password="12345678", repeat_password="12345678")
-        return user_service.create_user(user)
-
-    # ERROR ! AttributeError: 'Depends' object has no attribute 'execute' ---
-    # not possible to use it here; I can avoid hints
-    # don't use functionality; just execute directly to db
-
-    return _create_test_user
+    result = db.execute(query)
+    db.commit()
+    data = result.scalars().all()
+    return data if data else []
 
 
 @pytest.fixture(scope="function")
-def create_test_user(user_factory: Callable[..., dto.User]) -> dto.User:
-    return user_factory("test")
+def create_test_user(db: Session) -> User:
+    query: Insert = (insert(User).values(email="test@example.com", password_hash= get_password_hash("12345"))
+                     .returning(User))
+
+    result = db.execute(query)
+
+    db.commit()
+    return result.scalar_one_or_none()
+
+@pytest.fixture(scope="function")
+def create_unauthorized_user(db: Session) -> User:
+    query: Insert = (insert(User).values(email="unauth@example.com", password_hash=get_password_hash("12345"))
+                     .returning(User))
+
+    result = db.execute(query)
+
+    db.commit()
+    return result.scalar_one_or_none()
+
+@pytest.fixture(scope="function")
+def create_invited_user(db: Session) -> User:
+    query: Insert = (insert(User).values(email="invited@example.com", password_hash=get_password_hash("12345"))
+                     .returning(User))
+
+    result = db.execute(query)
+
+    db.commit()
+    return result.scalar_one_or_none()
 
 
 @pytest.fixture(scope="function")
-def unauthorized_user(user_factory: Callable[..., dto.User]) -> dto.User:
-    return user_factory("unauthorized")
+def create_participant_user(db: Session) -> User:
+    query: Insert = (insert(User).values(email="part@example.com", password_hash=get_password_hash("12345"))
+                     .returning(User))
 
+    result = db.execute(query)
 
-@pytest.fixture(scope="function")
-def invited_user(user_factory: Callable[..., dto.User]) -> dto.User:
-    return user_factory("invited")
-
-
-@pytest.fixture
-def participant_user(user_factory: Callable[..., dto.User]) -> dto.User:
-    return user_factory("participant")
+    db.commit()
+    return result.scalar_one_or_none()
 
 
 # to add mock data for documents
@@ -112,7 +125,7 @@ def participant_user(user_factory: Callable[..., dto.User]) -> dto.User:
 # Creating tokens
 @pytest.fixture
 def token_factory() -> Callable[..., str]:
-    def _create_token(user: dto.User) -> str:
+    def _create_token(user: User) -> str:
         token_expires = timedelta(minutes=60)
         token = create_access_token(
             data={"email": user.email, "id": str(user.id)},
@@ -124,15 +137,15 @@ def token_factory() -> Callable[..., str]:
 
 
 @pytest.fixture(scope="function")
-def test_token(token_factory: Callable[..., str], test_user: dto.User) -> str:
-    return token_factory(test_user)
+def create_test_token(token_factory: Callable[..., str], create_test_user: User) -> str:
+    return token_factory(create_test_user)
 
 
 @pytest.fixture(scope="function")
-def unauthorized_token(token_factory: Callable[..., str], unauthorized_user: dto.User) -> str:
-    return token_factory(unauthorized_user)
+def create_unauthorized_token(token_factory: Callable[..., str], create_unauthorized_user: User) -> str:
+    return token_factory(create_unauthorized_user)
 
 
 @pytest.fixture
-def participant_token(token_factory: Callable[..., str], participant_user: dto.User) -> str:
-    return token_factory(participant_user)
+def create_participant_token(token_factory: Callable[..., str], create_participant_user: User) -> str:
+    return token_factory(create_participant_user)

@@ -28,6 +28,7 @@ def upgrade() -> None:
         sa.Column("created_at", sa.DateTime, server_default=sa.func.now()),
         sa.Column("updated_at", sa.DateTime, server_default=sa.func.now(), onupdate=sa.func.now()),
         sa.Column("project_id", sa.Integer, nullable=False),
+        sa.UniqueConstraint("file_name"),
     )
     op.create_foreign_key(
         "fk_documents_project_id_projects", "documents", "projects", ["project_id"], ["id"], ondelete="CASCADE"

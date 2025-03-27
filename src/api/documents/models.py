@@ -12,8 +12,6 @@ class Document(Base):
     url: Mapped[str] = mapped_column(String, unique=True, index=True, nullable=False, comment="File path")
     project_id: Mapped[int] = mapped_column(Integer, ForeignKey("projects.id"), nullable=False, comment="Project ID")
 
-    # relationships
-    project = relationship("Project", back_populates="documents")
 
     def __repr__(self):
         return f"<Document(file name: {self.file_name})>"
